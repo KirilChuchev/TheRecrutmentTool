@@ -2,12 +2,12 @@
 namespace TheRecrutmentTool.Services
 {
     using System.Threading.Tasks;
-    using TheRecrutmentTool.ViewModels.Candidate;
+    using TheRecrutmentTool.Data.Models;
 
     public interface ICandidatesServices
     {
-        Task<bool> IsCandidateExists(string email);
+        Task<bool> IsCandidateExistsAsync(string email);
 
-        Task<int> Create(CandidateCreateModel model);
+        Task<int> CreateAsync(Candidate candidate);
     }
 }

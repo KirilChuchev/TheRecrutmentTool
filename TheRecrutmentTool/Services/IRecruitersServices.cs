@@ -1,14 +1,16 @@
 ﻿namespace TheRecrutmentTool.Services
 {
     using System.Threading.Tasks;
-    using TheRecrutmentTool.ViewModels.Recruiter;
+    using TheRecrutmentTool.Data.Models;
 
     public interface IRecruitersServices
     {
-        Task<bool> IsRecruiterExists(string email);
+        Task<bool> IsRecruiterExistsAsync(string email);
 
-        Task<int> GetRecruiterId(string email);
+        Task<int> GetRecruiterIdAsync(string email);
 
-        Task<int> Create(RecruiterCreateModel model);
+        Task<int> CreateAsync(Recruiter recruiter);
+
+        Task<int> CreateIfNotExistsAsync(Recruiter recruiter);
     }
 }
