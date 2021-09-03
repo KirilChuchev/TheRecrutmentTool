@@ -2,9 +2,9 @@
 {
     using System.Threading.Tasks;
     using TheRecrutmentTool.Data;
+    using TheRecrutmentTool.Constants;
     using Microsoft.EntityFrameworkCore;
     using TheRecrutmentTool.Data.Models;
-    using TheRecrutmentTool.Constants;
 
     public class RecruitersServices : IRecruitersServices
     {

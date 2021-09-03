@@ -1,8 +1,8 @@
 ﻿namespace TheRecrutmentTool.Services
 {
-    using Microsoft.EntityFrameworkCore;
     using System.Threading.Tasks;
     using TheRecrutmentTool.Data;
+    using Microsoft.EntityFrameworkCore;
     using TheRecrutmentTool.Data.Models;
 
     public class SkillsServices : ISkillsServices
