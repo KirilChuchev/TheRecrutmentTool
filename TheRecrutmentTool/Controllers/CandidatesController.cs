@@ -13,6 +13,8 @@
     using TheRecrutmentTool.ViewModels.Candidate;
     using TheRecrutmentTool.Data;
     using Microsoft.EntityFrameworkCore;
+    using TheRecrutmentTool.ViewModels.Skill;
+    using TheRecrutmentTool.ViewModels.Recruiter;
 
     [ApiController]
     [Route("[controller]")]
@@ -115,6 +117,8 @@
                     new Response { Status = "Error", Message = message });
                 };
 
+                var recruiter = await this.recruitersServices.GetRecruiterByIdAsync(candidate.RecruiterId);
+
                 var model = new CandidateViewModel()
                 {
                     FirstName = candidate.FirstName,
@@ -122,9 +126,22 @@
                     BirthDate = candidate.BirthDate.ToString(),
                     Bio = candidate.Bio,
                     Email = candidate.Email,
+                    Recruiter = new RecruiterViewModel()
+                    {
+                        LastName = recruiter.LastName,
+                        Email = recruiter.Email,
+                        Country = recruiter.Country,
+                        ExperienceLevel = recruiter.ExperienceLevel,
+                        InterviewSlots = recruiter.InterviewSlots,
+                    },
+                    Skills = (await this.dbContext.Skills
+                                                    .Where(x => x.Candidates.Any(y => y.CandidateId == candidate.Id))
+                                                    .ToArrayAsync())
+                                                    .Select(x => new SkillViewModel() 
+                                                    {
+                                                        Name = x.Name,
+                                                    }).ToArray(),
                 };
-
-                var skills1 = await this.dbContext.CandidateSkills.Where(x => x.CandidateId == id).ToListAsync();
 
                 return Ok(model);
             }
