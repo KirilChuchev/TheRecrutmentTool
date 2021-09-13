@@ -87,17 +87,6 @@
                 // Add Candidate's skills
                 await this.skillsServices.UpdateCandidateSkills(newCandidateId, skills);
 
-
-                //var candidate = await this.candidatesServices.GetByIdAsync(newCandidateId);
-                //candidate.Skills = skills.Select(x => new CandidateSkill()
-                //{
-                //    CandidateId = candidate.Id,
-                //    SkillId = x.Id,
-                //}).ToArray();
-
-
-                //await this.dbContext.SaveChangesAsync(); //TODO трябва да го разкарам оттук!
-
                 return Ok(new { Id = newCandidateId, Message = "Candidate created successfully." });
             }
             catch (Exception ex)

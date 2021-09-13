@@ -28,8 +28,6 @@
             {
                 optionsBuilder.UseSqlServer(DbConfiguration.ConnectionString);
             }
-
-
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
