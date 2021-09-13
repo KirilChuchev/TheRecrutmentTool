@@ -12,6 +12,8 @@
     using TheRecrutmentTool.Data.Models;
     using TheRecrutmentTool.ViewModels.Response;
     using TheRecrutmentTool.ViewModels.Candidate;
+    using TheRecrutmentTool.Data;
+    using Microsoft.EntityFrameworkCore;
 
     [ApiController]
     [Route("[controller]")]
@@ -22,79 +24,53 @@
         private readonly IRecruitersServices recruitersServices;
         private readonly ICandidatesServices candidatesServices;
         private readonly ISkillsServices skillsServices;
+        private readonly ApplicationDbContext dbContext;
 
         public CandidatesController(
-            ILogger<WeatherForecastController> logger, 
+            ILogger<WeatherForecastController> logger,
             IRecruitersServices recruitersServices,
             ICandidatesServices candidatesServices,
-            ISkillsServices skillsServices)
+            ISkillsServices skillsServices,
+            ApplicationDbContext dbContext)
         {
             _logger = logger;
             this.recruitersServices = recruitersServices;
             this.candidatesServices = candidatesServices;
             this.skillsServices = skillsServices;
+            this.dbContext = dbContext;
         }
 
-        [HttpGet, ActionName("/")]
-        //[Route("{id}")]
-        public async Task<IActionResult> GetOne([FromRoute] int id)
-        {
-            var candidate = await this.candidatesServices.GetByIdAsync(id);
-
-            if (candidate == null)
-            {
-                var message = "This candidate do not exists.";
-                return StatusCode(
-                StatusCodes.Status400BadRequest,
-                new Response { Status = "Error", Message = message });
-            };
-
-            var model = new CandidateViewModel()
-            {
-                FirstName = candidate.FirstName,
-                LastName = candidate.LastName,
-                BirthDate = candidate.BirthDate.ToString(),
-                Bio = candidate.Bio,
-                Email = candidate.Email,
-            };
-
-            return Ok(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CandidateCreateModel model)
+        [HttpPost, ActionName("/")]
+        public async Task<IActionResult> CreateAsync([FromBody] CandidateCreateModel model)
         {
             try
             {
-                var isCandidateExist = await this.candidatesServices.IsCandidateExistsAsync(model.Email);
+                var isCandidateEmailExist = await this.candidatesServices.IsCandidateEmailExistsAsync(model.Email);
 
-                if (isCandidateExist)
+                if (isCandidateEmailExist)
                 {
-                    var message = "This candidate already exists.";
+                    var message = "This email is already used.";
                     return StatusCode(
                     StatusCodes.Status400BadRequest,
                     new Response { Status = "Error", Message = message });
                 }
 
+                // Create new Recruiter if not exists.
                 var recruiter = new Recruiter()
                 {
                     LastName = model.Recruiter.LastName,
                     Email = model.Recruiter.Email,
                     Country = model.Recruiter.Country,
                 };
-
                 var recruiterId = await this.recruitersServices.CreateIfNotExistsAsync(recruiter);
+                await this.recruitersServices.IncreaseRecruiterExperience(recruiterId);
 
-                var skillModels = model.Skills.ToArray();
-                var skills = new List<Skill>();
+                // Create new Skills if not exist.
+                var skillNames = model.Skills.Select(x => x.Name).ToArray();
+                var skillIds = await this.skillsServices.CreateIfNotExistsAsync(skillNames);
+                var skills = await this.skillsServices.GetSkillsByIdAsync(skillIds);
 
-                foreach (var skillModel in skillModels)
-                {
-                    var skillId = await this.skillsServices.CreateIfNotExistsAsync(skillModel.Name);
-                    var skill = await this.skillsServices.GetSkillByIdAsync(skillId);
-                    skills.Add(skill);
-                }
-
+                // Create new Candidate.
                 var newCandidate = new Candidate()
                 {
                     FirstName = model.FirstName,
@@ -103,12 +79,139 @@
                     Bio = model.Bio,
                     BirthDate = DateTime.Parse(model.BirthDate),
                     RecruiterId = recruiterId,
-                    Skills = skills,
                 };
 
-                await this.candidatesServices.CreateAsync(newCandidate);
+                var id = await this.candidatesServices.CreateAsync(newCandidate);
 
-                return Ok("Candidate sucessfully created.");
+                // Add Candidate's skills
+                var candidate = await this.candidatesServices.GetByIdAsync(id);
+                candidate.Skills = skills.Select(x => new CandidateSkill()
+                {
+                    CandidateId = candidate.Id,
+                    SkillId = x.Id,
+                }).ToArray();
+
+
+                await this.dbContext.SaveChangesAsync(); //TODO трябва да го разкарам оттук!
+
+                return Ok(new { Id = id, Message = "Candidate created successfully." });
+            }
+            catch (Exception ex)
+            {
+                var message = ExceptionMessageCreator.CreateMessage(ex);
+
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new Response { Status = "Error", Message = message });
+            }
+        }
+
+        [HttpGet, ActionName("/")]
+        [Route("{id}")]
+        public async Task<IActionResult> GetOneAsync([FromRoute] int id)
+        {
+            try
+            {
+                var candidate = await this.candidatesServices.GetByIdAsync(id);
+
+                if (candidate == null)
+                {
+                    var message = "This candidate do not exists.";
+                    return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new Response { Status = "Error", Message = message });
+                };
+
+                var model = new CandidateViewModel()
+                {
+                    FirstName = candidate.FirstName,
+                    LastName = candidate.LastName,
+                    BirthDate = candidate.BirthDate.ToString(),
+                    Bio = candidate.Bio,
+                    Email = candidate.Email,
+                };
+
+                var skills1 = await this.dbContext.CandidateSkills.Where(x => x.CandidateId == id).ToListAsync();
+
+                return Ok(model);
+            }
+            catch (Exception ex)
+            {
+                var message = ExceptionMessageCreator.CreateMessage(ex);
+
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new Response { Status = "Error", Message = message });
+            }
+        }
+
+        [HttpPut, ActionName("/")]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateOneAsync([FromRoute] int id, [FromBody] CandidateCreateModel model)
+        {
+            try
+            {
+                var isCandidateExists = await this.candidatesServices.IsCandidateExistsAsync(id);
+                if (!isCandidateExists)
+                {
+                    var message = "This candidate do not exists.";
+                    return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new Response { Status = "Error", Message = message });
+                };
+
+                var isCandidateOwnsEmail = await this.candidatesServices.IsCandidateOwnsEmail(id, model.Email);
+                if (!isCandidateOwnsEmail)
+                {
+                    var message = "This candidate does not own this email.";
+                    return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new Response { Status = "Error", Message = message });
+                }
+
+                // Create new Recruiter if not exists.
+                var recruiter = new Recruiter()
+                {
+                    LastName = model.Recruiter.LastName,
+                    Email = model.Recruiter.Email,
+                    Country = model.Recruiter.Country,
+                };
+                var recruiterId = await this.recruitersServices.CreateIfNotExistsAsync(recruiter);
+                //var dbRecruiter = await this.recruitersServices.GetRecruiterByIdAsync(recruiterId);
+
+                //var currentRecruiterEmail = (await this.recruitersServices.GetRecruiterByIdAsync(recruiterId)).Email;
+                var updatedCandidateRecruiter = model.Recruiter;
+                var currentCandidateRecruiter = await this.candidatesServices.GetCandidateRecruiter(id);
+
+                // Check if updated recruiter is the same as current candidate recruiter.
+                if (currentCandidateRecruiter.Email != updatedCandidateRecruiter.Email)
+                {
+                    await this.recruitersServices.IncreaseRecruiterExperience(recruiterId);
+                }
+
+                // Create new Skills if not exist.
+                var skillNames = model.Skills.Select(x => x.Name).ToHashSet(); // Prevents duplicate elements.
+                var skillIds = await this.skillsServices.CreateIfNotExistsAsync(skillNames);
+                var skills = await this.skillsServices.GetSkillsByIdAsync(skillIds);
+
+                // Update Candidate data.
+                var candidate = new Candidate()
+                {
+                    Email = model.Email,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    Bio = model.Bio,
+                    BirthDate = DateTime.Parse(model.BirthDate),
+                    RecruiterId = recruiterId,
+                    Skills = skills.Select(x => new CandidateSkill()
+                    {
+                        CandidateId = id,
+                        SkillId = x.Id
+                    }).ToArray(),
+                };
+                var candidateId = await this.candidatesServices.UpdateAsync(id, candidate);
+
+                return Ok(new { Id = candidateId, Message = "Candidate updated successfully." });
             }
             catch (Exception ex)
             {

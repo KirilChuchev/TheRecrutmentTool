@@ -19,6 +19,8 @@
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<Recruiter> Recruiters { get; set; }
         public virtual DbSet<Skill> Skills { get; set; }
+        public virtual DbSet<CandidateSkill> CandidateSkills { get; set; }
+        public virtual DbSet<JobSkill> JobSkills { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

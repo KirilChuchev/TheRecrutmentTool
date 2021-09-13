@@ -9,7 +9,7 @@
     {
         public Candidate()
         {
-            this.Skills = new HashSet<Skill>();
+            this.Skills = new HashSet<CandidateSkill>();
             this.Interviews = new HashSet<Interview>();
         }
 
@@ -30,14 +30,14 @@
 
         [Required(ErrorMessage = "BirthDate should not be empty.")]
         public DateTime BirthDate { get; set; }
-
-        public ICollection<Skill> Skills { get; set; }
+        
+        public virtual ICollection<CandidateSkill> Skills { get; set; }
 
         [Required(ErrorMessage = "Recruiter should not be empty.")]
         [ForeignKey("RecruiterId")]
         public int RecruiterId { get; set; }
         public Recruiter Recruiter { get; set; }
 
-        public ICollection<Interview> Interviews { get; set; }
+        public virtual ICollection<Interview> Interviews { get; set; }
     }
 }

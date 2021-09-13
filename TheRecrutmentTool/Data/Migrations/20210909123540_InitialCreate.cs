@@ -77,48 +77,52 @@ namespace TheRecrutmentTool.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "JobSkill",
+                name: "JobSkills",
                 columns: table => new
                 {
-                    JobsId = table.Column<int>(type: "int", nullable: false),
-                    SkillsId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    JobId = table.Column<int>(type: "int", nullable: false),
+                    SkillId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_JobSkill", x => new { x.JobsId, x.SkillsId });
+                    table.PrimaryKey("PK_JobSkills", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_JobSkill_Jobs_JobsId",
-                        column: x => x.JobsId,
+                        name: "FK_JobSkills_Jobs_JobId",
+                        column: x => x.JobId,
                         principalTable: "Jobs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_JobSkill_Skills_SkillsId",
-                        column: x => x.SkillsId,
+                        name: "FK_JobSkills_Skills_SkillId",
+                        column: x => x.SkillId,
                         principalTable: "Skills",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "CandidateSkill",
+                name: "CandidateSkills",
                 columns: table => new
                 {
-                    CandidatesId = table.Column<int>(type: "int", nullable: false),
-                    SkillsId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CandidateId = table.Column<int>(type: "int", nullable: false),
+                    SkillId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CandidateSkill", x => new { x.CandidatesId, x.SkillsId });
+                    table.PrimaryKey("PK_CandidateSkills", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CandidateSkill_Candidates_CandidatesId",
-                        column: x => x.CandidatesId,
+                        name: "FK_CandidateSkills_Candidates_CandidateId",
+                        column: x => x.CandidateId,
                         principalTable: "Candidates",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CandidateSkill_Skills_SkillsId",
-                        column: x => x.SkillsId,
+                        name: "FK_CandidateSkills_Skills_SkillId",
+                        column: x => x.SkillId,
                         principalTable: "Skills",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -163,9 +167,14 @@ namespace TheRecrutmentTool.Data.Migrations
                 column: "RecruiterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CandidateSkill_SkillsId",
-                table: "CandidateSkill",
-                column: "SkillsId");
+                name: "IX_CandidateSkills_CandidateId",
+                table: "CandidateSkills",
+                column: "CandidateId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CandidateSkills_SkillId",
+                table: "CandidateSkills",
+                column: "SkillId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Interviews_CandidateId",
@@ -183,21 +192,26 @@ namespace TheRecrutmentTool.Data.Migrations
                 column: "RecruiterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_JobSkill_SkillsId",
-                table: "JobSkill",
-                column: "SkillsId");
+                name: "IX_JobSkills_JobId",
+                table: "JobSkills",
+                column: "JobId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JobSkills_SkillId",
+                table: "JobSkills",
+                column: "SkillId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CandidateSkill");
+                name: "CandidateSkills");
 
             migrationBuilder.DropTable(
                 name: "Interviews");
 
             migrationBuilder.DropTable(
-                name: "JobSkill");
+                name: "JobSkills");
 
             migrationBuilder.DropTable(
                 name: "Candidates");
