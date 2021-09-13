@@ -19,5 +19,7 @@
         Task<Skill> GetSkillsByIdAsync(int skillId);
 
         Task<ICollection<Skill>> GetSkillsByIdAsync(IEnumerable<int> skillIds);
+
+        Task UpdateCandidateSkills(int candidateId, IEnumerable<CandidateSkill> newSkills);
     }
 }

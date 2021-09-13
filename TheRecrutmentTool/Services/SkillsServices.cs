@@ -87,5 +87,32 @@
 
             return skillIds;
         }
+
+        public async Task UpdateCandidateSkills(int candidateId, IEnumerable<CandidateSkill> newSkills)
+        {
+            var entity = await this.dbContext.Candidates.FirstOrDefaultAsync(x => x.Id == candidateId);
+            // Remove all old skills and add all new ones if skills are changed.
+            var entitySkillIds = await this.dbContext.CandidateSkills
+                                                        .Where(x => x.CandidateId == candidateId)
+                                                        .Select(x => x.SkillId)
+                                                        .ToArrayAsync();
+            var newSkillIds = newSkills.Select(x => x.SkillId).ToHashSet();
+
+            var isSkillsChanged = !entitySkillIds.ToHashSet().SetEquals(newSkillIds);
+            if (!isSkillsChanged)
+            {
+                return;
+            }
+
+            // Remove all old skills.
+            var oldSkills = await this.dbContext.CandidateSkills.Where(x => x.CandidateId == candidateId).ToArrayAsync();
+            this.dbContext.CandidateSkills.RemoveRange(oldSkills);
+            await this.dbContext.SaveChangesAsync();
+
+            // Add new skills.
+            entity.Skills = newSkills.ToArray();
+
+            await this.dbContext.SaveChangesAsync();
+        }
     }
 }

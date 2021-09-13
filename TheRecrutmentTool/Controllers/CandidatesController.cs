@@ -6,7 +6,6 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Http;
     using TheRecrutmentTool.Helpers;
-    using System.Collections.Generic;
     using TheRecrutmentTool.Services;
     using Microsoft.Extensions.Logging;
     using TheRecrutmentTool.Data.Models;
@@ -65,11 +64,6 @@
                 var recruiterId = await this.recruitersServices.CreateIfNotExistsAsync(recruiter);
                 await this.recruitersServices.IncreaseRecruiterExperience(recruiterId);
 
-                // Create new Skills if not exist.
-                var skillNames = model.Skills.Select(x => x.Name).ToArray();
-                var skillIds = await this.skillsServices.CreateIfNotExistsAsync(skillNames);
-                var skills = await this.skillsServices.GetSkillsByIdAsync(skillIds);
-
                 // Create new Candidate.
                 var newCandidate = new Candidate()
                 {
@@ -80,21 +74,31 @@
                     BirthDate = DateTime.Parse(model.BirthDate),
                     RecruiterId = recruiterId,
                 };
-
-                var id = await this.candidatesServices.CreateAsync(newCandidate);
-
-                // Add Candidate's skills
-                var candidate = await this.candidatesServices.GetByIdAsync(id);
-                candidate.Skills = skills.Select(x => new CandidateSkill()
+                var newCandidateId = await this.candidatesServices.CreateAsync(newCandidate);
+                
+                // Create new Skills if not exist.
+                var skillNames = model.Skills.Select(x => x.Name).ToHashSet(); // Prevents duplicate elements.
+                var skillIds = await this.skillsServices.CreateIfNotExistsAsync(skillNames);
+                var skills = (await this.skillsServices.GetSkillsByIdAsync(skillIds)).Select(x => new CandidateSkill()
                 {
-                    CandidateId = candidate.Id,
+                    CandidateId = newCandidateId,
                     SkillId = x.Id,
                 }).ToArray();
+                // Add Candidate's skills
+                await this.skillsServices.UpdateCandidateSkills(newCandidateId, skills);
 
 
-                await this.dbContext.SaveChangesAsync(); //TODO трябва да го разкарам оттук!
+                //var candidate = await this.candidatesServices.GetByIdAsync(newCandidateId);
+                //candidate.Skills = skills.Select(x => new CandidateSkill()
+                //{
+                //    CandidateId = candidate.Id,
+                //    SkillId = x.Id,
+                //}).ToArray();
 
-                return Ok(new { Id = id, Message = "Candidate created successfully." });
+
+                //await this.dbContext.SaveChangesAsync(); //TODO трябва да го разкарам оттук!
+
+                return Ok(new { Id = newCandidateId, Message = "Candidate created successfully." });
             }
             catch (Exception ex)
             {
@@ -177,9 +181,7 @@
                     Country = model.Recruiter.Country,
                 };
                 var recruiterId = await this.recruitersServices.CreateIfNotExistsAsync(recruiter);
-                //var dbRecruiter = await this.recruitersServices.GetRecruiterByIdAsync(recruiterId);
 
-                //var currentRecruiterEmail = (await this.recruitersServices.GetRecruiterByIdAsync(recruiterId)).Email;
                 var updatedCandidateRecruiter = model.Recruiter;
                 var currentCandidateRecruiter = await this.candidatesServices.GetCandidateRecruiter(id);
 
