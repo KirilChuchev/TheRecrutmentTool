@@ -4,8 +4,9 @@
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using TheRecrutmentTool.Data.Models.BaseModels;
 
-    public class Candidate
+    public class Candidate : BaseDeletableModel, IDeletableEntity
     {
         public Candidate()
         {

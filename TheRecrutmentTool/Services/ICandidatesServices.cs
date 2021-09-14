@@ -19,5 +19,9 @@ namespace TheRecrutmentTool.Services
         Task<int> UpdateAsync(int candidateId, Candidate candidate);
 
         Task<Recruiter> GetCandidateRecruiter(int candidateId);
+
+        Task<int> DeleteAsync(int candidateId);
+
+        Task<int> DeleteHardAsync(int candidateId);
     }
 }

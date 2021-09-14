@@ -2,9 +2,9 @@
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
+    using TheRecrutmentTool.Data.Models.BaseModels;
 
-    public class Recruiter
+    public class Recruiter : BaseDeletableModel, IDeletableEntity
     {
         public Recruiter()
         {
@@ -28,7 +28,5 @@
 
         public ICollection<Interview> Interviews { get; set; } // this count = InterviewSlots
         public ICollection<Candidate> Candidates { get; set; } // this count = ExperienceLevel
-
-
     }
 }

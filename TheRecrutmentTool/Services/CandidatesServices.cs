@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
     using TheRecrutmentTool.Data.Models;
+    using System;
 
     public class CandidatesServices : ICandidatesServices
     {
@@ -80,6 +81,23 @@
             await this.skillsServices.UpdateCandidateSkills(candidateId, candidate.Skills);
 
             return entity.Id;
+        }
+
+        public async Task<int> DeleteAsync(int candidateId)
+        {
+            var entity = await this.GetByIdAsync(candidateId);
+            entity.IsDeleted = true;
+            entity.DeletedOn = DateTime.Now;
+            await this.dbContext.SaveChangesAsync();
+            return entity.Id;
+        }
+
+        public async Task<int> DeleteHardAsync(int candidateId)
+        {
+            var entity = await this.GetByIdAsync(candidateId);
+            var removedEntity = this.dbContext.Candidates.Remove(entity);
+            await this.dbContext.SaveChangesAsync();
+            return removedEntity.Entity.Id;
         }
     }
 }

@@ -2,18 +2,18 @@
 {
     using System;
     using System.Linq;
+    using TheRecrutmentTool.Data;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Http;
     using TheRecrutmentTool.Helpers;
     using TheRecrutmentTool.Services;
     using Microsoft.Extensions.Logging;
+    using Microsoft.EntityFrameworkCore;
     using TheRecrutmentTool.Data.Models;
+    using TheRecrutmentTool.ViewModels.Skill;
     using TheRecrutmentTool.ViewModels.Response;
     using TheRecrutmentTool.ViewModels.Candidate;
-    using TheRecrutmentTool.Data;
-    using Microsoft.EntityFrameworkCore;
-    using TheRecrutmentTool.ViewModels.Skill;
     using TheRecrutmentTool.ViewModels.Recruiter;
 
     [ApiController]
@@ -220,6 +220,35 @@
                 var candidateId = await this.candidatesServices.UpdateAsync(id, candidate);
 
                 return Ok(new { Id = candidateId, Message = "Candidate updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                var message = ExceptionMessageCreator.CreateMessage(ex);
+
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new Response { Status = "Error", Message = message });
+            }
+        }
+
+        [HttpDelete, ActionName("/")]
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteOneAsync([FromRoute] int id)
+        {
+            try
+            {
+                var isCandidateExists = await this.candidatesServices.IsCandidateExistsAsync(id);
+                if (!isCandidateExists)
+                {
+                    var message = "This candidate do not exists.";
+                    return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new Response { Status = "Error", Message = message });
+                };
+
+                var deletedCandidateId = await this.candidatesServices.DeleteAsync(id);
+
+                return Ok(new { Id = deletedCandidateId, Message = "Candidate deleted successfully." });
             }
             catch (Exception ex)
             {

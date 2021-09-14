@@ -2,8 +2,9 @@
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using TheRecrutmentTool.Data.Models.BaseModels;
 
-    public class Job
+    public class Job : BaseDeletableModel, IDeletableEntity
     {
         public Job()
         {

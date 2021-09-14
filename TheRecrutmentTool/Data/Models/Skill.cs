@@ -2,9 +2,9 @@
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
+    using TheRecrutmentTool.Data.Models.BaseModels;
 
-    public class Skill
+    public class Skill : BaseDeletableModel, IDeletableEntity
     {
         public Skill()
         {

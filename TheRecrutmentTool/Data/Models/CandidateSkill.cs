@@ -1,7 +1,9 @@
 ﻿namespace TheRecrutmentTool.Data.Models
 {
     using System.ComponentModel.DataAnnotations;
-    public class CandidateSkill
+    using TheRecrutmentTool.Data.Models.BaseModels;
+
+    public class CandidateSkill : BaseDeletableModel, IDeletableEntity
     {
         [Key]
         public int Id { get; set; }
