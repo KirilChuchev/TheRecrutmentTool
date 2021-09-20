@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace TheRecrutmentTool.Data.Models
+﻿namespace TheRecrutmentTool.Data.Models
 {
-    public class Interview
+    using System.ComponentModel.DataAnnotations;
+    using TheRecrutmentTool.Data.Models.BaseModels;
+    using System.ComponentModel.DataAnnotations.Schema;
+
+    public class Interview : BaseDeletableModel, IDeletableEntity
     {
         [Key]
         public int Id { get; set; }

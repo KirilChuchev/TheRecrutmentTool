@@ -10,8 +10,8 @@ using TheRecrutmentTool.Data;
 namespace TheRecrutmentTool.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210829110407_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20210914073436_IsDeletedAndDeletedOnProps")]
+    partial class IsDeletedAndDeletedOnProps
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,36 +20,6 @@ namespace TheRecrutmentTool.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.9")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("CandidateSkill", b =>
-                {
-                    b.Property<int>("CandidatesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SkillsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CandidatesId", "SkillsId");
-
-                    b.HasIndex("SkillsId");
-
-                    b.ToTable("CandidateSkill");
-                });
-
-            modelBuilder.Entity("JobSkill", b =>
-                {
-                    b.Property<int>("JobsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SkillsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("JobsId", "SkillsId");
-
-                    b.HasIndex("SkillsId");
-
-                    b.ToTable("JobSkill");
-                });
 
             modelBuilder.Entity("TheRecrutmentTool.Data.Models.Candidate", b =>
                 {
@@ -65,6 +35,9 @@ namespace TheRecrutmentTool.Data.Migrations
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -72,6 +45,9 @@ namespace TheRecrutmentTool.Data.Migrations
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -87,6 +63,34 @@ namespace TheRecrutmentTool.Data.Migrations
                     b.ToTable("Candidates");
                 });
 
+            modelBuilder.Entity("TheRecrutmentTool.Data.Models.CandidateSkill", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CandidateId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("SkillId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CandidateId");
+
+                    b.HasIndex("SkillId");
+
+                    b.ToTable("CandidateSkills");
+                });
+
             modelBuilder.Entity("TheRecrutmentTool.Data.Models.Interview", b =>
                 {
                     b.Property<int>("Id")
@@ -96,6 +100,12 @@ namespace TheRecrutmentTool.Data.Migrations
 
                     b.Property<int>("CandidateId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("JobId")
                         .HasColumnType("int");
@@ -121,9 +131,15 @@ namespace TheRecrutmentTool.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<double>("Salary")
                         .HasColumnType("float");
@@ -137,6 +153,34 @@ namespace TheRecrutmentTool.Data.Migrations
                     b.ToTable("Jobs");
                 });
 
+            modelBuilder.Entity("TheRecrutmentTool.Data.Models.JobSkill", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("JobId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkillId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.HasIndex("SkillId");
+
+                    b.ToTable("JobSkills");
+                });
+
             modelBuilder.Entity("TheRecrutmentTool.Data.Models.Recruiter", b =>
                 {
                     b.Property<int>("Id")
@@ -148,6 +192,9 @@ namespace TheRecrutmentTool.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -157,6 +204,9 @@ namespace TheRecrutmentTool.Data.Migrations
 
                     b.Property<int>("InterviewSlots")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -174,6 +224,12 @@ namespace TheRecrutmentTool.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -181,36 +237,6 @@ namespace TheRecrutmentTool.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Skills");
-                });
-
-            modelBuilder.Entity("CandidateSkill", b =>
-                {
-                    b.HasOne("TheRecrutmentTool.Data.Models.Candidate", null)
-                        .WithMany()
-                        .HasForeignKey("CandidatesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TheRecrutmentTool.Data.Models.Skill", null)
-                        .WithMany()
-                        .HasForeignKey("SkillsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("JobSkill", b =>
-                {
-                    b.HasOne("TheRecrutmentTool.Data.Models.Job", null)
-                        .WithMany()
-                        .HasForeignKey("JobsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TheRecrutmentTool.Data.Models.Skill", null)
-                        .WithMany()
-                        .HasForeignKey("SkillsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("TheRecrutmentTool.Data.Models.Candidate", b =>
@@ -222,6 +248,25 @@ namespace TheRecrutmentTool.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Recruiter");
+                });
+
+            modelBuilder.Entity("TheRecrutmentTool.Data.Models.CandidateSkill", b =>
+                {
+                    b.HasOne("TheRecrutmentTool.Data.Models.Candidate", "Candidate")
+                        .WithMany("Skills")
+                        .HasForeignKey("CandidateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheRecrutmentTool.Data.Models.Skill", "Skill")
+                        .WithMany("Candidates")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Candidate");
+
+                    b.Navigation("Skill");
                 });
 
             modelBuilder.Entity("TheRecrutmentTool.Data.Models.Interview", b =>
@@ -245,14 +290,37 @@ namespace TheRecrutmentTool.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TheRecrutmentTool.Data.Models.JobSkill", b =>
+                {
+                    b.HasOne("TheRecrutmentTool.Data.Models.Job", "Job")
+                        .WithMany("Skills")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheRecrutmentTool.Data.Models.Skill", "Skill")
+                        .WithMany("Jobs")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+
+                    b.Navigation("Skill");
+                });
+
             modelBuilder.Entity("TheRecrutmentTool.Data.Models.Candidate", b =>
                 {
                     b.Navigation("Interviews");
+
+                    b.Navigation("Skills");
                 });
 
             modelBuilder.Entity("TheRecrutmentTool.Data.Models.Job", b =>
                 {
                     b.Navigation("Interviews");
+
+                    b.Navigation("Skills");
                 });
 
             modelBuilder.Entity("TheRecrutmentTool.Data.Models.Recruiter", b =>
@@ -260,6 +328,13 @@ namespace TheRecrutmentTool.Data.Migrations
                     b.Navigation("Candidates");
 
                     b.Navigation("Interviews");
+                });
+
+            modelBuilder.Entity("TheRecrutmentTool.Data.Models.Skill", b =>
+                {
+                    b.Navigation("Candidates");
+
+                    b.Navigation("Jobs");
                 });
 #pragma warning restore 612, 618
         }

@@ -2,9 +2,9 @@
 {
     using System.Threading.Tasks;
     using TheRecrutmentTool.Data;
+    using TheRecrutmentTool.Constants;
     using Microsoft.EntityFrameworkCore;
     using TheRecrutmentTool.Data.Models;
-    using TheRecrutmentTool.Constants;
 
     public class RecruitersServices : IRecruitersServices
     {
@@ -25,7 +25,12 @@
             return (await this.dbContext.Recruiters.FirstOrDefaultAsync(x => x.Email == email)).Id;
         }
 
-        public async Task<int> CreateAsync(Recruiter recruiter) // RecruiterCreateModel model
+        public async Task<Recruiter> GetRecruiterByIdAsync(int id)
+        {
+            return await this.dbContext.Recruiters.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<int> CreateAsync(Recruiter recruiter)
         {
             var entity = await this.dbContext.AddAsync(recruiter);
             await this.dbContext.SaveChangesAsync();
@@ -37,17 +42,16 @@
         {
             var isRecruiterExists = await this.IsRecruiterExistsAsync(recruiter.Email);
 
-            if (isRecruiterExists)
-            {
-                var recruiterId = await this.GetRecruiterIdAsync(recruiter.Email);
-                await this.IncreaseRecruiterExperience(recruiterId);
-                return recruiterId;
-            }
+            var recruiterId = 
+                isRecruiterExists 
+                ? await this.GetRecruiterIdAsync(recruiter.Email) 
+                : await this.CreateAsync(recruiter);
 
-            return await this.CreateAsync(recruiter);
+            //await this.IncreaseRecruiterExperience(recruiterId);
+            return recruiterId;
         }
 
-        private async Task IncreaseRecruiterExperience(int recruiterId)
+        public async Task IncreaseRecruiterExperience(int recruiterId)
         {
             var recruiter = await this.dbContext.Recruiters.FirstOrDefaultAsync(x => x.Id == recruiterId);
             recruiter.ExperienceLevel += 1;

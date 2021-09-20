@@ -2,13 +2,14 @@
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using TheRecrutmentTool.Data.Models.BaseModels;
 
-    public class Skill
+    public class Skill : BaseDeletableModel, IDeletableEntity
     {
         public Skill()
         {
-            this.Candidates = new HashSet<Candidate>();
-            this.Jobs = new HashSet<Job>();
+            this.Candidates = new HashSet<CandidateSkill>();
+            this.Jobs = new HashSet<JobSkill>();
         }
 
         [Key]
@@ -17,7 +18,7 @@
         [Required(ErrorMessage = "Skill name should not be empty.")]
         public string Name { get; set; }
 
-        public ICollection<Candidate> Candidates { get; set; }
-        public ICollection<Job> Jobs { get; set; }
+        public virtual ICollection<CandidateSkill> Candidates { get; set; }
+        public virtual ICollection<JobSkill> Jobs { get; set; }
     }
 }

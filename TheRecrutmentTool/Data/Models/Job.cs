@@ -2,12 +2,13 @@
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using TheRecrutmentTool.Data.Models.BaseModels;
 
-    public class Job
+    public class Job : BaseDeletableModel, IDeletableEntity
     {
         public Job()
         {
-            this.Skills = new HashSet<Skill>();
+            this.Skills = new HashSet<JobSkill>();
             this.Interviews = new HashSet<Interview>();
         }
 
@@ -23,8 +24,8 @@
         [Required]
         [Range(0, double.MaxValue, ErrorMessage = "Only positive number allowed")]
         public double Salary { get; set; }
-        public ICollection<Skill> Skills { get; set; }
+        public virtual ICollection<JobSkill> Skills { get; set; }
 
-        public ICollection<Interview> Interviews { get; set; }
+        public virtual ICollection<Interview> Interviews { get; set; }
     }
 }
