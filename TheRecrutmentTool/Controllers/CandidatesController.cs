@@ -15,6 +15,7 @@
     using TheRecrutmentTool.ViewModels.Response;
     using TheRecrutmentTool.ViewModels.Candidate;
     using TheRecrutmentTool.ViewModels.Recruiter;
+    using TheRecrutmentTool.Attributes;
 
     [ApiController]
     [Route("[controller]")]
@@ -103,6 +104,7 @@
 
         [HttpGet, ActionName("/")]
         [Route("{id}")]
+        [LogApiRequest]
         public async Task<IActionResult> GetOneAsync([FromRoute] int id)
         {
             try
